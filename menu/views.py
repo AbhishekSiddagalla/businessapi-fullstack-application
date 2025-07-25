@@ -1,3 +1,5 @@
+import os
+
 import requests
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +9,7 @@ from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from menu import api_data
+from menu import api_data_config
 
 #Login API
 class LoginView(APIView):
@@ -119,8 +121,8 @@ class SendMessageView(APIView):
         if not components:
             return Response({"error": "invalid message components"}, status=400)
 
-        header = next((comp for comp in components if comp.get("type") == "header"), None)
-        body = next((comp for comp in components if comp.get("type") == "body"), None)
+        header = next((component for component in components if component.get("type") == "header"), None)
+        body = next((component for component in components if component.get("type") == "body"), None)
 
         if not header or not header.get("parameters"):
             return Response({"error": "invalid header params"}, status=400)
@@ -131,10 +133,10 @@ class SendMessageView(APIView):
         if footer and not footer.get("parameters"):
             return Response({"error": "invalid footer params"}, status=400)
 
-        url = f"https://graph.facebook.com/{api_data.api_version}/{api_data.phone_number_id}/messages"
+        url = f"https://graph.facebook.com/{api_data_config.api_version}/{api_data_config.phone_number_id}/messages"
 
         headers = {
-            "Authorization": f"Bearer {api_data.api_access_token}",
+            "Authorization": f"Bearer {api_data_config.api_access_token}",
             "Content-Type": "application/json"
         }
 
@@ -145,15 +147,16 @@ class SendMessageView(APIView):
             return Response(response.json(), status=response.status_code)
 
 
+# Template list API
 class TemplatesListView(APIView):
 
     def get(self, request):
-        if not api_data.api_access_token:
+        if not api_data_config.api_access_token:
             return Response({"error": "invalid token"}, status=401)
 
-        url = f"https://graph.facebook.com/{api_data.api_version}/{api_data.whatsapp_business_account_id}/message_templates"
+        url = f"https://graph.facebook.com/{api_data_config.api_version}/{api_data_config.whatsapp_business_account_id}/message_templates"
         headers = {
-            "Authorization": f"Bearer {api_data.api_access_token}",
+            "Authorization": f"Bearer {api_data_config.api_access_token}",
             "Content-Type": "application/json"
         }
 
@@ -167,3 +170,75 @@ class TemplatesListView(APIView):
             return Response({"error": "permission denied"})
         else:
             return Response({"error": response.json()})
+
+class CreateTemplateView(APIView):
+
+    def media_upload_session(self, media_file_type):
+        try:
+            file_length = os.path.getsize(api_data_config.media_file_name)
+
+        except FileNotFoundError:
+            return Response({"error": "invalid filename"},status=400)
+
+        url = (
+               f"https://graph.facebook.com/{api_data_config.api_version}/{api_data_config.app_id}/uploads"
+               f"?file_name={api_data_config.media_file_name}"
+               f"&file_length={file_length}"
+               f"&file_type={media_file_type}"
+               f"&access_token={api_data_config.api_access_token}"
+               )
+        headers = {
+            "Authorization": f"Bearer {api_data_config.api_access_token}"
+        }
+
+        response = requests.post(url, headers=headers)
+        if response.status_code != 200:
+            return Response({"error": "media upload failed"},status = response.status_code)
+        return response.json().get("id")
+
+    def fetch_header_handle(self, session_id):
+        url = f"https://graph.facebook.com/{api_data_config.api_version}/{session_id}"
+        headers = {
+            "Authorization": f"Bearer {api_data_config.api_access_token}",
+            "file_offset": "0"
+        }
+        response = requests.post(url, headers=headers)
+        if response.status_code != 200:
+            return Response({"error": "header handle fetch failed"}, status = response.status_code)
+        return response.json().get("h")
+
+    def post(self, request):
+        data = request.data
+
+        #validating required fields
+        required_fields = ["name", "category", "language", "components"]
+        for field in required_fields:
+            if field not in data:
+                return Response({"error": f"invalid {field}"},status=400)
+
+        #fetching media type from request body
+        components = data.get("components")
+        for component in components:
+            if component["type"] == "HEADER" and component["format"] in ["IMAGE", "VIDEO", "DOCUMENT"]:
+                media_file_type = component["format"]
+
+                session_id = self.media_upload_session(media_file_type)
+                header_handle = self.fetch_header_handle(session_id)
+
+                component["example"] = {"header_handle": [header_handle]}
+
+        url = f"https://graph.facebook.com/{api_data_config.api_version}/{api_data_config.whatsapp_business_account_id}/message_templates"
+        headers = {
+            "Authorization": f"Bearer {api_data_config.api_access_token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, headers=headers)
+        if response.status_code == 200:
+            return Response({"response": "template created successfully"})
+        elif response.status_code == 401:
+            return Response({"error": "invalid token"},status=401)
+        elif response.status_code == 403:
+            return Response({"error": "permission denied"}, status=403)
+        else:
+            return Response({"error": response.json()}, status=response.status_code)

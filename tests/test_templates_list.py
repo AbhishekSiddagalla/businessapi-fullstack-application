@@ -14,7 +14,7 @@ class TestTemplatesList:
         return view.get(request)
 
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.get")
     def test_with_valid_request(self,mock_get,mock_api_data):
         # mocking api data
@@ -32,7 +32,7 @@ class TestTemplatesList:
         assert response.data["response"] == "templates retrieved successfully"
 
     @patch("menu.views.requests.get")
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     def test_with_missing_token(self, mock_api_data, mock_get):
         mock_api_data.api_version = "V22.0"
         mock_api_data.whatsapp_business_account_id = "9876543210"
@@ -47,7 +47,7 @@ class TestTemplatesList:
         assert response.status_code == 401
         assert response.data["error"] == "invalid token"
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.get")
     def test_with_expired_token(self, mock_get, mock_api_data):
         # mocking api data

@@ -39,7 +39,7 @@ class TestSendMessageView:
         view = SendMessageView()
         return view.post(request)
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.post")
     def test_with_valid_payload(self, mock_post, mock_api_data, payload):
         #mocking API data
@@ -56,7 +56,7 @@ class TestSendMessageView:
         assert response.status_code == 200
         assert response.data["response"] == "message sent successfully"
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.post")
     def test_with_missing_access_token(self, mock_post, mock_api_data, payload):
         # mocking API data
@@ -73,7 +73,7 @@ class TestSendMessageView:
         assert response.status_code == 401
         assert response.data["error"] == "Invalid token"
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.post")
     def test_with_expired_access_token(self, mock_post, mock_api_data, payload):
         # mocking API data
@@ -90,7 +90,7 @@ class TestSendMessageView:
         assert response.status_code == 401
         assert response.data["error"] == "Invalid token"
 
-    @patch("menu.views.api_data")
+    @patch("menu.views.api_data_config")
     @patch("menu.views.requests.post")
     def test_with_forbidden_access(self, mock_post, mock_api_data, payload):
         # mocking API data
