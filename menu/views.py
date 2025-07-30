@@ -89,12 +89,8 @@ class MenuView(APIView):
 
 
 class DashboardView(APIView):
-
     def get(self, request):
         user = request.user
-
-        if not user :
-            return Response({"error": "invalid token"}, status=401)
 
         if hasattr(user,'role') and user.role:
             return Response({"response": "welcome to dashboard"}, status=200)
@@ -143,16 +139,18 @@ class SendMessageView(APIView):
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             return Response({"response": "message sent successfully"}, status=200)
+        elif response.status_code == 401:
+            return Response({"error": "invalid token"}, status=401)
+        elif response.status_code == 403:
+            return Response({"error": "permission denied"}, status=403)
         else:
-            return Response(response.json(), status=response.status_code)
+            return Response({"error": response.json()})
 
 
 # Template list API
 class TemplatesListView(APIView):
 
     def get(self, request):
-        if not api_data_config.api_access_token:
-            return Response({"error": "invalid token"}, status=401)
 
         url = f"https://graph.facebook.com/{api_data_config.api_version}/{api_data_config.whatsapp_business_account_id}/message_templates"
         headers = {
@@ -163,11 +161,11 @@ class TemplatesListView(APIView):
         response = requests.get(url,headers=headers)
 
         if response.status_code == 200:
-            return Response({"response": "templates retrieved successfully"})
+            return Response({"response": "templates retrieved successfully"}, status=200)
         elif response.status_code == 401:
-            return Response({"error": "invalid token"})
+            return Response({"error": "invalid token"},status=401)
         elif response.status_code == 403:
-            return Response({"error": "permission denied"})
+            return Response({"error": "permission denied"}, status=403)
         else:
             return Response({"error": response.json()})
 

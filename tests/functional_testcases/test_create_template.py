@@ -45,7 +45,6 @@ class TestCreateTemplateView:
         ]
 
         response = self.call_create_template_view(payload)
-        print(response)
 
         assert response.status_code == 200
         assert response.data["response"] == "template created successfully"
