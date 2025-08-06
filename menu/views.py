@@ -26,27 +26,37 @@ class LoginView(APIView):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            # login(request,user)
+            login(request,user)
             refresh = RefreshToken.for_user(user)
             return Response({
                 "response": "login successful",
-                "token": str(refresh.access_token)
+                "token": str(refresh.access_token),
+                "refresh": str(refresh)
             }, status=200)
         return Response({"error": "No user found"},status= 401)
 
 #logout API
+
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self,request):
-        logout(request)
+        try:
+            refresh_token = request.data.get("refresh")
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # invalidating the existing token
+            logout(request)
+            return Response({"response": "logout successful"}, status=200)
+        except Exception as e:
+            print("logout error:", str(e))
+            return Response({"error": "invalid token"}, status=401)
 
 
 #Refresh Token API
 class RefreshTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self,request):
-        refresh_token = request.data
-        print(refresh_token)
+        refresh_token = request.data.get("refresh")
 
         if not refresh_token:
             return Response({"error": "token is missing"},status=401)
@@ -60,9 +70,17 @@ class RefreshTokenView(APIView):
             return Response({"error":"invalid token"}, status=401)
 
 
+# Token Validation API
+class ValidateTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        return Response({"response": "valid token"}, status=200)
+
+
 #Menu API
 class MenuView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self,request):
         user = request.user
@@ -89,6 +107,8 @@ class MenuView(APIView):
 
 
 class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         user = request.user
 
@@ -100,6 +120,8 @@ class DashboardView(APIView):
 
 #Send Message API
 class SendMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         payload = request.data
 
@@ -149,6 +171,7 @@ class SendMessageView(APIView):
 
 # Template list API
 class TemplatesListView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
@@ -161,7 +184,20 @@ class TemplatesListView(APIView):
         response = requests.get(url,headers=headers)
 
         if response.status_code == 200:
-            return Response({"response": "templates retrieved successfully"}, status=200)
+            data = response.json()
+
+            templates = data.get("data", [])
+
+            templates_table = [ {
+                "name": template.get("name"),
+                "status": template.get("status"),
+                "category": template.get("category")
+            } for template in templates]
+
+            return Response({
+                "response": "templates retrieved successfully",
+                "templates_table": templates_table
+                             }, status=200)
         elif response.status_code == 401:
             return Response({"error": "invalid token"},status=401)
         elif response.status_code == 403:
@@ -170,7 +206,7 @@ class TemplatesListView(APIView):
             return Response({"error": response.json()})
 
 class CreateTemplateView(APIView):
-
+    permission_classes = [IsAuthenticated]
     def media_upload_session(self, media_file_type):
         try:
             file_length = os.path.getsize(api_data_config.media_file_name)
@@ -204,6 +240,7 @@ class CreateTemplateView(APIView):
         if response.status_code != 200:
             return Response({"error": "header handle fetch failed"}, status = response.status_code)
         return response.json().get("h")
+
 
     def post(self, request):
         data = request.data
