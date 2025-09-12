@@ -22,7 +22,7 @@ export default function Login() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("refresh", response.data.refresh);
 
-      navigate("/dashboard");
+      navigate("/api/dashboard");
     } catch (error) {
       setError("Invalid Username or Password");
     }

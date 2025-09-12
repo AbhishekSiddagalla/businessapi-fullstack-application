@@ -6,6 +6,11 @@ import ProtectedRoute from "./ProtectedRoute";
 import axiosInstance from "./axiosInstance";
 import { useEffect } from "react";
 
+import SendMessage from "./SendMessage";
+import TemplateList from "./TemplateList";
+import CreateTemplate from "./CreateTemplate";
+import Reports from "./Reports";
+
 export default function App() {
   // refreshing the token
   const refreshAccessToken = async () => {
@@ -42,13 +47,50 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="/dashboard"
+          path="/api/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route
+            index
+            element={<h1>Welcome to the WhatsApp API Dashboard</h1>}
+          />
+          <Route
+            path="send-message"
+            element={
+              <ProtectedRoute>
+                <SendMessage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="template-list"
+            element={
+              <ProtectedRoute>
+                <TemplateList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="create-template"
+            element={
+              <ProtectedRoute>
+                <CreateTemplate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
       </Routes>
     </Router>
   );

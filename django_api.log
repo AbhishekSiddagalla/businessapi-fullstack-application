@@ -1,0 +1,14 @@
+INFO 2025-08-26 18:48:29,067 autoreload Watching for file changes with StatReloader
+INFO 2025-08-26 18:48:45,492 autoreload C:\Users\AbhishekSiddagalla\my_tasks\Business_API\menu\views.py changed, reloading.
+INFO 2025-08-26 18:48:50,918 autoreload Watching for file changes with StatReloader
+INFO 2025-08-26 18:49:03,698 basehttp "OPTIONS /api/v1/menu/validate-token/ HTTP/1.1" 200 0
+INFO 2025-08-26 18:49:03,806 basehttp "GET /api/v1/menu/validate-token/ HTTP/1.1" 200 26
+INFO 2025-08-26 18:49:03,844 basehttp "OPTIONS /api/v1/menu/validate-token/ HTTP/1.1" 200 0
+INFO 2025-08-26 18:49:03,872 basehttp "GET /api/v1/menu/validate-token/ HTTP/1.1" 200 26
+INFO 2025-08-26 18:49:03,906 basehttp "OPTIONS /api/v1/menu/templates-list/ HTTP/1.1" 200 0
+INFO 2025-08-26 18:49:05,073 basehttp "GET /api/v1/menu/templates-list/ HTTP/1.1" 200 1486
+INFO 2025-08-26 18:49:36,462 basehttp "OPTIONS /api/v1/menu/send-message/ HTTP/1.1" 200 0
+INFO 2025-08-26 18:49:37,239 basehttp "POST /api/v1/menu/send-message/ HTTP/1.1" 200 236
+INFO 2025-08-26 18:56:39,477 autoreload C:\Users\AbhishekSiddagalla\my_tasks\Business_API\menu\views.py changed, reloading.
+INFO 2025-08-26 18:56:44,472 autoreload Watching for file changes with StatReloader
+INFO 2025-08-26 18:57:17,596 autoreload C:\Users\AbhishekSiddagalla\my_tasks\Business_API\Business_API\settings.py changed, reloading.

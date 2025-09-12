@@ -21,7 +21,12 @@ export default function TemplateList() {
         const response = await axiosInstance.get("api/v1/menu/templates-list/");
 
         if (response.status === 200) {
-          setRowData(response.data.templates_table);
+          const filteredData = response.data.templates.data.map((template) => ({
+            name: template.name,
+            status: template.status,
+            category: template.category,
+          }));
+          setRowData(filteredData);
         }
       } catch (error) {
         console.error("Error fetching templates", error);
@@ -32,8 +37,17 @@ export default function TemplateList() {
   return (
     <>
       <h1> Templates List </h1>
-      <div className="ag-theme-alpine" style={{ height: 300, width: "60%" }}>
-        <AgGridReact rowData={rowData} columnDefs={columnDefs} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "top",
+          height: "80vh",
+        }}
+      >
+        <div className="ag-theme-alpine" style={{ height: 300, width: "60%" }}>
+          <AgGridReact rowData={rowData} columnDefs={columnDefs} />
+        </div>
       </div>
     </>
   );
