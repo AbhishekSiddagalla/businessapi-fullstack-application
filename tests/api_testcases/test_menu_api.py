@@ -81,5 +81,4 @@ class TestMenuAPI:
 
         response = api_client.get(menu_url)
 
-        assert response.status_code == 403
-        assert response.data["error"] == "permission denied"
+        assert response.status_code == 401

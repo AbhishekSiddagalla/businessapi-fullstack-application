@@ -36,7 +36,7 @@ def test_send_message_failure(mock_post):
 
 def test_send_message_with_invalid_webhook_url():
     url = "https://dummyurl.com"
-    message = None
+    message = ""
 
     with pytest.raises(ValueError, match="Invalid Teams Webhook URL"):
         send_message_to_teams(url, message)

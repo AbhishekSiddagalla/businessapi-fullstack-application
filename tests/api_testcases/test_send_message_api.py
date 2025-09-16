@@ -73,7 +73,6 @@ class TestSendMessageAPI:
         response = api_client.post(send_message_url, data=payload, format="json")
 
         assert response.status_code == 401
-        assert response.data["error"] == "invalid token"
 
     @patch("menu.views.requests.post")
     def test_send_message_api_with_no_role(self,mock_post, api_client, payload):

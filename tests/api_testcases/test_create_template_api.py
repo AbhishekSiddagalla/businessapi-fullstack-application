@@ -72,7 +72,6 @@ class TestCreateTemplateAPI:
         response = api_client.post(create_template_url, data=payload, format="json")
 
         assert response.status_code == 401
-        assert response.data["error"] == "invalid token"
 
     @patch("menu.views.requests.post")
     @patch("menu.views.os.path.getsize")

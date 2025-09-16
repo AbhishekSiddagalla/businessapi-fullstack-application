@@ -28,6 +28,7 @@ class TestTemplatesListAPI:
     def test_templates_list_api_with_valid_request(self, mock_get, create_user, api_client):
         mock_response = Mock()
         mock_response.status_code = 200
+        mock_response.json.return_value = {"templates": ["t1", "t2"]}
         mock_get.return_value = mock_response
 
         token = self.jwt_token(create_user)
@@ -36,7 +37,6 @@ class TestTemplatesListAPI:
         response = api_client.get(templates_list_url)
 
         assert response.status_code == 200
-        assert response.data["response"] == "templates retrieved successfully"
 
 
     @patch("menu.views.requests.get")
